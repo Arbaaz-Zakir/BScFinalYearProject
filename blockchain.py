@@ -13,7 +13,7 @@ import json
 from flask import Flask, jsonify, request
 import requests
 from uuid import uuid4
-from urlib.parse import urlparse
+from urllib.parse import urlparse
 
 #building general blockchain
 class Blockchain:
@@ -21,6 +21,7 @@ class Blockchain:
         self.chain = []
         self.transaction = []
         self.create_block(proof = 1, previous_hash = '0')
+        self.nodes = set()
         
     def create_block(self, proof, previous_hash):
         block = {'index': len(self.chain) + 1,
@@ -72,7 +73,26 @@ class Blockchain:
                                  'amount': amount})
             previous_block = self.get_previous_block()
             return previous_block['index'] + 1
-    
+    def add_node(self, address):
+        parsed_url = urlparse(address)
+        self.nodes.add(parsed_url.netloc)
+        
+    def replace_chain(self):
+        network = self.nodes
+        longest_chain = None
+        max_length = len(self.chain)
+        for nodes in network:
+            response = requests.get(f'http://{node}/get_chain')
+            if response.status_code ==200:
+                length = response.json()['length']
+                chain = response.json()['chain']
+                if length > max_length and self.is_chain_valid(chain):
+                    max_length = length
+                    longest_chain = chain
+        if longest_chain:
+            self.chain = longest_chain
+            return True
+        return False
 #mining blockchain
         
 #web app
