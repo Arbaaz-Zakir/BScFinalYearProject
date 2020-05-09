@@ -150,6 +150,32 @@ def add_transaction():
     index = blockchain.add_transaction(json['sender'], json['receiver'], json['amount'])
     response = {'message': f'transaction will be added to block {index}'}
     return jsonify(response), 201
+
+# connect new nodes
+@app.route('/connect_node', methods=['POST'])
+def connect_node():
+    json = request.get_json()
+    nodes = json.get('nodes')
+    if nodes is None:
+        return "no nodes", 400
+    for node in nodes:
+        blockchain.add_node(node)
+    response = {'message': 'All nodes connected. new nodes are:',
+                'total_nodes': list(blockchain.nodes)}
+    return jsonify(response), 201
+
+#replace chain by longest chain
+@app.route('/replace_chain', methods=['GET'])
+def replace_chain():
+    is_chain_replaced = blockchain.replace_chain()
+    if is_chain_replaced is True:
+        response = {'message': 'chain replaced by the longest', 'new_chain': blockchain.chain}
+    else:
+        response = {'message':'current blockchain is the longest', 'actual_chain': blockchain.chain}
+    response = {'message' : valid_state}
+    
+    return jsonify(response), 200
+
 #run
 app.run(host = '0.0.0.0', port = 5000)
 
