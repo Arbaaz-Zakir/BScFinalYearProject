@@ -44,7 +44,8 @@ class Temp:
                 session = username
                 print ('welcome back: ' + session)
                 
-        print('invalid user/password')
+        else:
+            print('invalid user/password')
     
     def register(self):
         num = 0
@@ -62,7 +63,7 @@ class Temp:
         elif fname is "" or lname is "" or username is "" or password is "":
             print("failed to input 1 or more appropriate fields!")
         else: 
-            db.user.insert_one({ "firstname":fname,
+            db.users.insert_one({ "firstname":fname,
                                  "lastname":lname,
                                  "username":username,
                                  "password":password,
@@ -77,7 +78,7 @@ class Temp:
         music = db.music
         music_title = input("input new title:\n")
         new_lyrics = input("input new lyrics:\n")
-        artist = input("input new writer:\n")
+        artist = input("input new artist:\n")
         writer = input("input new writer:\n")
         
         index = -1
@@ -85,7 +86,7 @@ class Temp:
         others = ["","","","","","",""]
         while other_state is not "done":
             other_inputs = input("input new others to credit:\n") # loop array
-            if other_inputs == "done":
+            if other_inputs == "!done":
                 other_state = "done"
                 
             index+=1
