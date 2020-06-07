@@ -3,6 +3,9 @@ from difflib import SequenceMatcher
 import datetime 
 client = MongoClient("mongodb://localhost:27017/")
 db = client.blockchain
+mock_blockchain = client.mockblockchain
+
+#TEMPLATES
 #post_ex = {"_id": 0,
 #           "firstname": "Arbaaz",
 #           "lastname": "Zakir",
@@ -32,7 +35,7 @@ class Temp:
         print("[A] add new song\n")
         print("[E] exit\n")
         print("[C] show commands\n")
-
+        print("[!status] check pending song status")
 
     def login(self, username, passwd):
         users = db.users
@@ -121,6 +124,7 @@ class Temp:
         userkarma = db.users.find_one({"username": session})["karma"]
         userrep = db.users.find_one({"username": session})["Reputation"]
         transfer_time = self.temp_database_delay(userkarma, userrep)
+        tst_time = self.tst_temp_database_delay()
         print("music will be released on the blockchain at " + transfer_time.strftime("%d-%m-%Y %H:%M:%S"))
         db.music.insert_one({ "lyrics": new_lyrics,
                               "title": music_title,
@@ -129,7 +133,7 @@ class Temp:
                               "username": session,
                               "others": others,
                               "infringement": infringement,
-                              "release to blockchain": transfer_time})
+                              "release to blockchain": tst_time})
         
         
     def lyrics_similarity(self, song1, song2):
@@ -140,8 +144,26 @@ class Temp:
         rel_time = base_time + datetime.timedelta(hours = karma) 
         rel_time = rel_time - datetime.timedelta(minutes = reputation)
         return rel_time
+    def tst_temp_database_delay(self):
+        base_time = datetime.datetime.now() 
+        rel_time = base_time + datetime.timedelta(seconds = 20) 
+        #rel_time = rel_time - datetime.timedelta(minutes = reputation)
+        return rel_time       
         
-        
+    
+    def is_time(self):
+        if session != "":
+            user_song = db.music.find({"username": session})
+            for song in user_song:
+                if song["release to blockchain"] <= datetime.datetime.now():
+                    songtitle = song["title"]
+                    mock_blockchain.music.insert_one(song)
+                    print(songtitle + " by "+ song["artist"] + " has been moved to the blockchain")
+                    db.music.delete_one({"title":songtitle})
+                else:
+                    print("no song of that title or has already moved to the blockchain")
+        else:
+            print("must login to check status")
         
 #if __name__ == '__main__':     
 tmp = Temp()
@@ -169,5 +191,6 @@ while state is not 'exit':
     elif userin == 'A' or userin =='a':
         tmp.add_song()
         
-        
+    elif userin =='!status':
+        tmp.is_time()
         
