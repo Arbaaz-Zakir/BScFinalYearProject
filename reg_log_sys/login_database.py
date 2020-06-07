@@ -144,6 +144,7 @@ class Temp:
         rel_time = base_time + datetime.timedelta(hours = karma) 
         rel_time = rel_time - datetime.timedelta(minutes = reputation)
         return rel_time
+    
     def tst_temp_database_delay(self):
         base_time = datetime.datetime.now() 
         rel_time = base_time + datetime.timedelta(seconds = 20) 
