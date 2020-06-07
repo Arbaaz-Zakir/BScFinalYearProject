@@ -87,20 +87,25 @@ class Temp:
         while other_state is not "done":
             other_inputs = input("input new others to credit:\n") # loop array
             if other_inputs == "!done":
-                other_state = "done"
-                
-            index+=1
-            others[index] ==[other_inputs]
+                other_state = "done"   
+            else:
+                index+=1
+                others[index] = other_inputs
+            
         infringement = []
-        it_lyrics = music.find({"lyrics"})
-        if music.count() != 0:
+        it_lyrics = music.find({}, {"username": 1, "title": 1,"lyrics":1})
+        if music.count != 0 :
             for lyrics in it_lyrics:
+                infringement = []
                 to_compare = lyrics["lyrics"]
-                similarity_percent = lyrics_similarity(new_lyrics, to_compare)
+                similarity_percent = self.lyrics_similarity(new_lyrics, to_compare)
             
                 if similarity_percent > 0.50:
-                    infringement.append([lyrics["username"], lyrics["title"], similarity_percent])
-                
+                    infringement = []
+                    infringement.append([{"username": lyrics["username"]}, 
+                                          {"lyrics": lyrics["title"]}, 
+                                          {"similarity %": similarity_percent*100}])
+    
         db.music.insert_one({ "lyrics": new_lyrics,
                               "title": music_title,
                               "artist": artist,
@@ -110,7 +115,7 @@ class Temp:
                               "infringement": infringement})
         
         
-    def lyrics_similarity(song1, song2):
+    def lyrics_similarity(self, song1, song2):
         return SequenceMatcher(None, song1, song2).ratio()
         
 
