@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from difflib import SequenceMatcher 
-
+import datetime 
 client = MongoClient("mongodb://localhost:27017/")
 db = client.blockchain
 #post_ex = {"_id": 0,
@@ -53,7 +53,7 @@ class Temp:
         lname = input("enter last name:\n")
         username = input("enter user name:\n")
         password = input("enter password:\n")
-        reputation = 0
+        reputation = 50
         karma = 0
         
         users = db.users
@@ -101,24 +101,48 @@ class Temp:
                 similarity_percent = self.lyrics_similarity(new_lyrics, to_compare)
             
                 if similarity_percent > 0.50:
+                    db.users.update_one({"username":session},
+                                        {"$inc":{"karma":1}})
+                    
+                    db.users.update_one({"username":session},
+                                        {"$inc":{"Reputation":-2}})
+                    
                     infringement = []
                     infringement.append([{"username": lyrics["username"]}, 
                                           {"lyrics": lyrics["title"]}, 
                                           {"similarity %": similarity_percent*100}])
-    
+                else:
+                    db.users.update_one({"username":session},
+                                        {"$inc":{"karma":-1}})
+                    
+                    db.users.update_one({"username":session},
+                                        {"$inc":{"Reputation":2}})
+                    
+        userkarma = db.users.find_one({"username": session})["karma"]
+        userrep = db.users.find_one({"username": session})["Reputation"]
+        transfer_time = self.temp_database_delay(userkarma, userrep)
+        print("music will be released on the blockchain at " + transfer_time.strftime("%d-%m-%Y %H:%M:%S"))
         db.music.insert_one({ "lyrics": new_lyrics,
                               "title": music_title,
                               "artist": artist,
                               "writer": writer,
                               "username": session,
                               "others": others,
-                              "infringement": infringement})
+                              "infringement": infringement,
+                              "release to blockchain": transfer_time})
         
         
     def lyrics_similarity(self, song1, song2):
         return SequenceMatcher(None, song1, song2).ratio()
         
-
+    def temp_database_delay(self, karma, reputation):
+        base_time = datetime.datetime.now() + datetime.timedelta(hours = 24)
+        rel_time = base_time + datetime.timedelta(hours = karma) 
+        rel_time = rel_time - datetime.timedelta(minutes = reputation)
+        return rel_time
+        
+        
+        
 #if __name__ == '__main__':     
 tmp = Temp()
 print("welcome to blockchain music temporary data storage system, input command to start")
