@@ -121,6 +121,7 @@ class Temp:
 
 #if __name__ == '__main__':     
 tmp = Temp()
+print("welcome to blockchain music temporary data storage system, input command to start")
 tmp.show_cmds()
 #userin = input("command\n")
 state= 'cmd'
